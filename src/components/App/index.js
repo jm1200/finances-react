@@ -5,7 +5,6 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
 
-import AuthContext from "../Session";
 import { useAuthentication } from "../../custom-hooks";
 
 //Components
@@ -17,6 +16,7 @@ import PasswordForget from "../PasswordForget";
 import HomePage from "../Home";
 import AccountPage from "../Account";
 import AdminPage from "../Admin";
+import UsersPage from "../UsersPage";
 
 //Router Components
 import * as ROUTES from "../../constants/routes";
@@ -32,10 +32,10 @@ const theme = createMuiTheme({
   }
 });
 
-export const DispatchContext = React.createContext(null);
+export const AppStateContext = React.createContext(null);
 
 const App = () => {
-  const authUser = useAuthentication();
+  const userState = useAuthentication();
 
   const [navState, dispatchNavAction] = useReducer(
     navStateReducer,
@@ -43,62 +43,68 @@ const App = () => {
   );
 
   //Global dispatch function
-  const dispatch = action => {
+  const dispatchActionFunctions = action => {
     [dispatchNavAction].forEach(fn => fn(action));
   };
-  const AppState = { navState };
+  const AppState = { navState, userState };
 
-  console.log("App: ", authUser);
+  console.log("App: ", userState);
   return (
     <div>
       <React.Fragment>
         <ThemeProvider theme={theme}>
-          <AuthContext.Provider value={authUser}>
-            <DispatchContext.Provider value={{ dispatch, AppState }}>
-              <CssBaseline />
-              <BrowserRouter>
-                <Navigation />
+          <AppStateContext.Provider
+            value={{ dispatchActionFunctions, AppState }}
+          >
+            <CssBaseline />
+            <BrowserRouter>
+              <Navigation />
 
-                <Route exact path={ROUTES.LANDING} component={LandingPage} />
+              <Route exact path={ROUTES.LANDING} component={LandingPage} />
 
-                <PublicRoute
-                  component={SignUpPage}
-                  path={ROUTES.SIGN_UP}
-                  authUser={authUser}
-                />
-                <PublicRoute
-                  component={SignInPage}
-                  path={ROUTES.SIGN_IN}
-                  authUser={authUser}
-                />
+              <PublicRoute
+                component={SignUpPage}
+                path={ROUTES.SIGN_UP}
+                authUser={userState}
+              />
+              <PublicRoute
+                component={SignInPage}
+                path={ROUTES.SIGN_IN}
+                authUser={userState}
+              />
 
-                <PublicRoute
-                  component={PasswordForget}
-                  path={ROUTES.PASSWORD_FORGET}
-                  authUser={authUser}
-                />
+              <PublicRoute
+                component={PasswordForget}
+                path={ROUTES.PASSWORD_FORGET}
+                authUser={userState}
+              />
 
-                <PrivateRoute
-                  component={HomePage}
-                  path={ROUTES.HOME}
-                  authUser={authUser}
-                  roles={"USER"}
-                />
-                <PrivateRoute
-                  component={AccountPage}
-                  path={ROUTES.ACCOUNT}
-                  authUser={authUser}
-                  roles={"USER"}
-                />
-                <PrivateRoute
-                  component={AdminPage}
-                  path={ROUTES.ADMIN}
-                  authUser={authUser}
-                  roles={"ADMIN"}
-                />
-              </BrowserRouter>
-            </DispatchContext.Provider>
-          </AuthContext.Provider>
+              <PrivateRoute
+                component={HomePage}
+                path={ROUTES.HOME}
+                authUser={userState}
+                roles={"USER"}
+              />
+              <PrivateRoute
+                component={AccountPage}
+                path={ROUTES.ACCOUNT}
+                authUser={userState}
+                roles={"USER"}
+              />
+              <PrivateRoute
+                component={AdminPage}
+                path={ROUTES.ADMIN}
+                authUser={userState}
+                roles={"ADMIN"}
+              />
+              <PrivateRoute
+                component={UsersPage}
+                path={ROUTES.USERS}
+                authUser={userState}
+                roles={"ADMIN"}
+              />
+            </BrowserRouter>
+          </AppStateContext.Provider>
         </ThemeProvider>
       </React.Fragment>
     </div>

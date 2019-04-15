@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { TextField, Paper, Button, Typography } from "@material-ui/core";
 import { useInput, useSubmit } from "../../custom-hooks";
 import { validations } from "../../constants/validation-regex";
+import { FirebaseContext } from "../Firebase";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -28,20 +29,35 @@ const useStyles = makeStyles(theme => {
       marginTop: theme.spacing.unit * 3,
       marginBottom: theme.spacing.unit * 3,
       width: "100%"
+    },
+    green: {
+      color: "#388e3c"
     }
   };
 });
 
 const PasswordChange = () => {
   const classes = useStyles();
+  const firebase = useContext(FirebaseContext);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleSubmit = data => {
-    console.log("Change password submit not connected, ", data);
+    const password = data.password;
+
+    firebase
+      .doPasswordUpdate(password)
+      .then(() => {
+        setSuccess(true);
+      })
+      .catch(error => {
+        setError(error);
+      });
   };
 
   const password = useInput("password", "", validations.ANY);
   const password2 = useInput("password2", "", validations.ANY);
-  const submit = useSubmit([password, password2], handleSubmit);
+  const submit = useSubmit([password, password2], handleSubmit, true);
 
   const isInvalid = Boolean(
     !password.props.value ||
@@ -56,13 +72,19 @@ const PasswordChange = () => {
           Change Password
         </Typography>
         <form className={classes.form} {...submit.props}>
-          <TextField {...password.props} label="Enter new password" fullWidth />
+          <TextField
+            {...password.props}
+            type="password"
+            label="Enter new password"
+            fullWidth
+          />
           {password.error && (
             <Typography variant="body1" color="error">
               {password.error}
             </Typography>
           )}
           <TextField
+            type="password"
             {...password2.props}
             label="Re-enter new password"
             fullWidth
@@ -87,6 +109,16 @@ const PasswordChange = () => {
               variant="body1"
               color="error"
             >{`Please enter valid email address`}</Typography>
+          )}
+          {error && (
+            <Typography variant="body1" color="error">
+              {error.message}
+            </Typography>
+          )}
+          {success && (
+            <Typography variant="body1" className={classes.green}>
+              You have succesfully changed your password
+            </Typography>
           )}
         </form>
       </Paper>

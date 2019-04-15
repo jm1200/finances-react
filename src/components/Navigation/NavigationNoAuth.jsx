@@ -1,14 +1,12 @@
 import React from "react";
 import { Button } from "@material-ui/core";
-import * as ROUTES from "../../constants/routes";
-import { NavLink } from "react-router-dom";
-
-const signInLink = props => {
-  return <NavLink to={ROUTES.SIGN_IN} {...props} />;
-};
+import { link1, signInLink } from "../../constants/navlinks";
 
 const NavigationNoAuth = () => (
   <>
+    <Button component={link1} color="inherit">
+      No Auth Link 1
+    </Button>
     <Button
       component={signInLink}
       //onClick={this.handleMenuClose}

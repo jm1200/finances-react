@@ -22,6 +22,10 @@ export default function useInput(name, defaultValue, regex) {
     return valid;
   }
 
+  function resetInput() {
+    setValue("");
+  }
+
   return {
     props: {
       name,
@@ -30,6 +34,7 @@ export default function useInput(name, defaultValue, regex) {
       onBlur: handleBlur,
       error
     },
-    validate: handleValidate
+    validate: handleValidate,
+    resetInput
   };
 }

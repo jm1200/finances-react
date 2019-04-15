@@ -53,6 +53,7 @@ const SignUp = props => {
             {
               firstName,
               lastName,
+              email,
               roles: ["USER"]
             },
             { merge: true }

@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
-import AuthContext from "../Session";
+import { AppStateContext } from "../App";
 
 const Home = () => {
-  const authUser = useContext(AuthContext);
+  const authUser = useContext(AppStateContext).AppState.userState;
 
   return (
     <div>

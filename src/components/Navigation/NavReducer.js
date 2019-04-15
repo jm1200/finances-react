@@ -6,6 +6,8 @@ const navStateReducer = (state, action) => {
         { ...state },
         { adminToolsAnchorEl: action.payload }
       );
+    case "SIDENAVTOGGLE":
+      return Object.assign({}, { ...state }, { sideNav: !state.sideNav });
     default:
       return state;
   }

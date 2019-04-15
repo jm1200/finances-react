@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
-import { DispatchContext } from "../App";
+import { AppStateContext } from "../App";
 import { Menu, MenuItem } from "@material-ui/core";
-import { NavLink } from "react-router-dom";
+import { usersPageLink, link2, link3 } from "../../constants/navlinks";
 const AdminToolsMenu = () => {
-  const dispatch = useContext(DispatchContext).dispatch;
-  const navState = useContext(DispatchContext).AppState.navState;
+  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
+  const navState = useContext(AppStateContext).AppState.navState;
 
   const isAdminToolsMenuOpen = Boolean(navState.adminToolsAnchorEl);
 
@@ -20,27 +20,17 @@ const AdminToolsMenu = () => {
       open={isAdminToolsMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem component={addEditArticleLink} onClick={handleMenuClose}>
-        Add Article
-      </MenuItem>
-      <MenuItem component={addThemeLink} onClick={handleMenuClose}>
-        Add Theme
-      </MenuItem>
-      <MenuItem component={usersLink} onClick={handleMenuClose}>
+      <MenuItem component={usersPageLink} onClick={handleMenuClose}>
         Users
+      </MenuItem>
+      <MenuItem component={link2} onClick={handleMenuClose}>
+        Admin link 2
+      </MenuItem>
+      <MenuItem component={link3} onClick={handleMenuClose}>
+        Admin link 3
       </MenuItem>
     </Menu>
   );
 };
 
 export default AdminToolsMenu;
-
-const addEditArticleLink = props => {
-  return <NavLink to="/AddEditArticle" {...props} />;
-};
-const addThemeLink = props => {
-  return <NavLink to="/AddTheme" {...props} />;
-};
-const usersLink = props => {
-  return <NavLink to="/Users" {...props} />;
-};

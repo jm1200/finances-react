@@ -6,7 +6,7 @@ function flatten(array) {
   return obj;
 }
 
-export default function useSubmit(inputs, success) {
+export default function useSubmit(inputs, success, reset = false) {
   const [errorItems, setErrorItems] = useState(null);
 
   function handleSubmit(e) {
@@ -15,6 +15,9 @@ export default function useSubmit(inputs, success) {
     setErrorItems(errorItems);
     if (errorItems && errorItems.length === 0) {
       success(flatten(inputs));
+    }
+    if (reset) {
+      inputs.forEach(input => input.resetInput());
     }
   }
 

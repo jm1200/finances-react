@@ -1,20 +1,22 @@
 import React, { useContext } from "react";
-import { NavLink } from "react-router-dom";
-import * as ROUTES from "../../constants/routes";
-import AuthContext from "../Session";
+import { homePageLink, landingPageLink } from "../../constants/navlinks";
+import { AppStateContext } from "../App";
 import { makeStyles } from "@material-ui/styles";
 import {
   Typography,
   Button,
   IconButton,
   Toolbar,
-  AppBar
+  AppBar,
+  Drawer
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
+import { unstable_useMediaQuery as useMediaQuery } from "@material-ui/core/useMediaQuery";
 
 import NavigationNoAuth from "./NavigationNoAuth";
 import NavigationAuth from "./NavigationAuth";
 import AdminToolsMenu from "./AdminToolsMenu";
+import SideNav from "./SideNav";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -27,27 +29,42 @@ const useStyles = makeStyles(theme => {
     menuButton: {
       marginLeft: -12,
       marginRight: 20
+    },
+    list: {
+      width: 250
     }
   };
 });
 
 const Navigation = () => {
-  const authUser = useContext(AuthContext);
+  const authUser = useContext(AppStateContext).AppState.userState;
+  const navState = useContext(AppStateContext).AppState.navState;
+  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
   const classes = useStyles();
+  //const tablet = useMediaQuery("(max-width: 950px)");
+  const phone = useMediaQuery("(max-width: 600px)");
+  const desktop = useMediaQuery("(min-width: 601px)");
 
   const titleLink = authUser ? homePageLink : landingPageLink;
+
+  const toggleSideNav = () => {
+    dispatch({ type: "SIDENAVTOGGLE" });
+  };
 
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="Menu"
-          >
-            <MenuIcon />
-          </IconButton>
+          {phone && (
+            <IconButton
+              className={classes.menuButton}
+              color="inherit"
+              aria-label="Menu"
+              onClick={toggleSideNav}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
 
           <div className={classes.grow}>
             <Button
@@ -60,45 +77,25 @@ const Navigation = () => {
               </Typography>
             </Button>
           </div>
-
-          {authUser ? (
-            <NavigationAuth authUser={authUser} />
-          ) : (
-            <NavigationNoAuth />
+          {desktop && (
+            <>
+              {authUser ? (
+                <NavigationAuth authUser={authUser} />
+              ) : (
+                <NavigationNoAuth />
+              )}
+            </>
           )}
         </Toolbar>
       </AppBar>
+      <Drawer open={navState.sideNav} onClose={toggleSideNav}>
+        <div tabIndex={0} role="button" onClick={toggleSideNav}>
+          <SideNav />
+        </div>
+      </Drawer>
       <AdminToolsMenu />
     </div>
   );
-};
-
-// const signUpLink = props => {
-//   return <NavLink to="/SignUp" {...props} />;
-// };
-// const browseArticlesLink = props => {
-//   return <NavLink to="/BrowseArticles" {...props} />;
-// };
-// const addEditArticleLink = props => {
-//   return <NavLink to="/AddEditArticle" {...props} />;
-// };
-// const themesLink = props => {
-//   return <NavLink to="/Themes" {...props} />;
-// };
-// const profileLink = props => {
-//   return <NavLink to="/Profile" {...props} />;
-// };
-// const usersLink = props => {
-//   return <NavLink to="/Users" {...props} />;
-// };
-// const addThemeLink = props => {
-//   return <NavLink to="/AddTheme" {...props} />;
-// };
-const landingPageLink = props => {
-  return <NavLink to={ROUTES.LANDING} {...props} />;
-};
-const homePageLink = props => {
-  return <NavLink to={ROUTES.HOME} {...props} />;
 };
 
 export default Navigation;

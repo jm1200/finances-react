@@ -1,21 +1,15 @@
 import React, { useContext } from "react";
 import { Button } from "@material-ui/core";
-import * as ROUTES from "../../constants/routes";
 import * as ROLES from "../../constants/roles";
-import { NavLink } from "react-router-dom";
+import { accountPageLink, link1 } from "../../constants/navlinks";
 import SignOut from "../SignOut";
-import { DispatchContext } from "../App";
-
-const accountPageLink = props => {
-  return <NavLink to={ROUTES.ACCOUNT} {...props} />;
-};
+import { AppStateContext } from "../App";
 
 const NavigationAuth = ({ authUser }) => {
-  const dispatch = useContext(DispatchContext).dispatch;
-  const navState = useContext(DispatchContext).AppState.navState;
+  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
+  const navState = useContext(AppStateContext).AppState.navState;
 
   const openAdminTools = event => {
-    //console.log("clicked, ", navState.adminToolsAnchorEl);
     const payload = navState.adminToolsAnchorEl ? null : event.currentTarget;
     dispatch({ type: "ADMIN", payload });
   };
@@ -27,12 +21,11 @@ const NavigationAuth = ({ authUser }) => {
           Admin Tools
         </Button>
       ) : null}
-      <Button
-        component={accountPageLink}
-        //onClick={this.handleMenuClose}
-        color="inherit"
-      >
+      <Button component={accountPageLink} color="inherit">
         Account
+      </Button>
+      <Button component={link1} color="inherit">
+        With Auth Link 1
       </Button>
 
       <SignOut />

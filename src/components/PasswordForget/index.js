@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { TextField, Paper, Button, Typography } from "@material-ui/core";
 import { useInput, useSubmit } from "../../custom-hooks";
 import { validations } from "../../constants/validation-regex";
+import { FirebaseContext } from "../Firebase";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -28,18 +29,33 @@ const useStyles = makeStyles(theme => {
       marginTop: theme.spacing.unit * 3,
       marginBottom: theme.spacing.unit * 3,
       width: "100%"
+    },
+    green: {
+      color: "#388e3c"
     }
   };
 });
 const PasswordForget = () => {
   const classes = useStyles();
+  const firebase = useContext(FirebaseContext);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleSubmit = data => {
-    console.log("Forget password submit not connected, ", data);
+    console.log(data);
+    firebase
+      .doPasswordReset(data.email)
+      .then(() => {
+        setSuccess(true);
+      })
+      .catch(error => {
+        setError(error);
+      });
   };
 
   const email = useInput("email", "", validations.EMAIL);
-  const submit = useSubmit([email], handleSubmit);
+  const submit = useSubmit([email], handleSubmit, true);
+
   return (
     <React.Fragment>
       <Paper className={classes.paper}>
@@ -68,6 +84,16 @@ const PasswordForget = () => {
               variant="body1"
               color="error"
             >{`Please enter valid email address`}</Typography>
+          )}
+          {error && (
+            <Typography variant="body1" color="error">
+              {error.message}
+            </Typography>
+          )}
+          {success && (
+            <Typography variant="body1" className={classes.green}>
+              An email with a password reset link has been sent.
+            </Typography>
           )}
         </form>
       </Paper>
