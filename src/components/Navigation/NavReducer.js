@@ -8,6 +8,7 @@ const navStateReducer = (state, action) => {
       );
     case "SIDENAVTOGGLE":
       return Object.assign({}, { ...state }, { sideNav: !state.sideNav });
+
     default:
       return state;
   }

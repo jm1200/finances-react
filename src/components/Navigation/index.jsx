@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { homePageLink, landingPageLink } from "../../constants/navlinks";
+import { homePageLink, landingPageLink } from "./navlinks";
 import { AppStateContext } from "../App";
 import { makeStyles } from "@material-ui/styles";
 import {
@@ -89,7 +89,7 @@ const Navigation = () => {
         </Toolbar>
       </AppBar>
       <Drawer open={navState.sideNav} onClose={toggleSideNav}>
-        <div tabIndex={0} role="button" onClick={toggleSideNav}>
+        <div tabIndex={0} role="button">
           <SideNav />
         </div>
       </Drawer>

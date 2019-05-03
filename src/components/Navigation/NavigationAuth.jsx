@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 import { Button } from "@material-ui/core";
 import * as ROLES from "../../constants/roles";
-import { accountPageLink, link1 } from "../../constants/navlinks";
 import SignOut from "../SignOut";
 import { AppStateContext } from "../App";
+import { authLinks } from "./navlinks";
 
 const NavigationAuth = ({ authUser }) => {
   const dispatch = useContext(AppStateContext).dispatchActionFunctions;
@@ -21,12 +21,13 @@ const NavigationAuth = ({ authUser }) => {
           Admin Tools
         </Button>
       ) : null}
-      <Button component={accountPageLink} color="inherit">
-        Account
-      </Button>
-      <Button component={link1} color="inherit">
-        With Auth Link 1
-      </Button>
+      {authLinks.map(obj => {
+        return (
+          <Button key={obj.label} color="inherit" component={obj.link}>
+            {obj.label}
+          </Button>
+        );
+      })}
 
       <SignOut />
     </>

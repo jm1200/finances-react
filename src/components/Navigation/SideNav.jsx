@@ -1,12 +1,14 @@
 import React, { useContext } from "react";
 import { List, ListItem, Divider } from "@material-ui/core";
 import { AppStateContext } from "../App";
-import {
-  link1,
-  signInLink,
-  accountPageLink,
-  usersPageLink
-} from "../../constants/navlinks";
+import { authLinks, noAuthLinks, adminToolsMenuOptions } from "./navlinks";
+import SignOut from "../SignOut";
+// import {
+//   link1,
+//   signInLink,
+//   accountPageLink,
+//   usersPageLink
+// } from "../../constants/navlinks";
 
 const SideNav = () => {
   const dispatch = useContext(AppStateContext).dispatchActionFunctions;
@@ -37,21 +39,46 @@ export default SideNav;
 const SideNavNoAuth = ({ toggleSideNav }) => {
   return (
     <>
-      <ListItem component={link1} onClick={toggleSideNav}>
+      {noAuthLinks.map(obj => {
+        return (
+          <ListItem
+            key={obj.label}
+            component={obj.link}
+            onClick={toggleSideNav}
+          >
+            {obj.label}
+          </ListItem>
+        );
+      })}
+      {/* <ListItem component={link1} onClick={toggleSideNav}>
         No Authentication Link 1
       </ListItem>
 
-      <ListItem component={signInLink}>Sign In</ListItem>
+      <ListItem component={signInLink}>Sign In</ListItem> */}
     </>
   );
 };
 const SideNavAuth = ({ toggleSideNav }) => {
   return (
     <>
-      <ListItem component={link1} onClick={toggleSideNav}>
+      {authLinks.map(obj => {
+        return (
+          <ListItem
+            key={obj.label}
+            component={obj.link}
+            onClick={toggleSideNav}
+          >
+            {obj.label}
+          </ListItem>
+        );
+      })}
+      <Divider />
+      <SignOut Component={ListItem} />
+
+      {/* <ListItem component={link1} onClick={toggleSideNav}>
         With Authentication Link 1
       </ListItem>
-      <ListItem component={accountPageLink}>Account</ListItem>
+      <ListItem component={accountPageLink}>Account</ListItem> */}
     </>
   );
 };
@@ -59,10 +86,22 @@ const SideNavAdmin = ({ toggleSideNav }) => {
   return (
     <>
       <Divider />
-      <ListItem component={link1} onClick={toggleSideNav}>
+      {adminToolsMenuOptions.map(obj => {
+        return (
+          <ListItem
+            key={obj.label}
+            component={obj.link}
+            onClick={toggleSideNav}
+          >
+            {obj.label}
+          </ListItem>
+        );
+      })}
+
+      {/* <ListItem component={link1} onClick={toggleSideNav}>
         No Authentication and Admin Role Link 1
       </ListItem>
-      <ListItem component={usersPageLink}>Admin</ListItem>
+      <ListItem component={usersPageLink}>Admin</ListItem> */}
     </>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { AppStateContext } from "../App";
 import { Menu, MenuItem } from "@material-ui/core";
-import { usersPageLink, link2, link3 } from "../../constants/navlinks";
+import { adminToolsMenuOptions } from "./navlinks";
+
 const AdminToolsMenu = () => {
   const dispatch = useContext(AppStateContext).dispatchActionFunctions;
   const navState = useContext(AppStateContext).AppState.navState;
@@ -20,15 +21,17 @@ const AdminToolsMenu = () => {
       open={isAdminToolsMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem component={usersPageLink} onClick={handleMenuClose}>
-        Users
-      </MenuItem>
-      <MenuItem component={link2} onClick={handleMenuClose}>
-        Admin link 2
-      </MenuItem>
-      <MenuItem component={link3} onClick={handleMenuClose}>
-        Admin link 3
-      </MenuItem>
+      {adminToolsMenuOptions.map(obj => {
+        return (
+          <MenuItem
+            key={obj.label}
+            component={obj.link}
+            onClick={handleMenuClose}
+          >
+            {obj.label}
+          </MenuItem>
+        );
+      })}
     </Menu>
   );
 };
