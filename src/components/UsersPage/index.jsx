@@ -1,5 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { FirebaseContext } from "../Firebase";
+//import { Switch, Route, Link } from "react-router-dom";
+//import * as ROUTES from "../../constants/routes";
+import UserList from "./UserList";
+//import UserDetails from "./UserDetails";
 
 const UsersPage = () => {
   const [users, setUsers] = useState(null);
@@ -23,6 +27,7 @@ const UsersPage = () => {
     <div>
       <h1>User Page</h1>
       <p>This page is available to every signed in Admin only</p>
+
       {loading && <div>Loading ...</div>}
 
       {users && <UserList users={users} />}
@@ -31,24 +36,3 @@ const UsersPage = () => {
 };
 
 export default UsersPage;
-
-const UserList = ({ users }) => (
-  <ul>
-    {users.map(user => (
-      <li key={user.uid}>
-        <span>
-          <strong> ID: </strong> {user.uid}
-        </span>
-        <span>
-          <strong> E-Mail: </strong> {user.email}
-        </span>
-        <span>
-          <strong> First Name: </strong> {user.firstName}
-        </span>
-        <span>
-          <strong> Last Name: </strong> {user.lastName}
-        </span>
-      </li>
-    ))}
-  </ul>
-);

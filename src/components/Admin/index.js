@@ -9,10 +9,10 @@ const Admin = () => (
     <p>
       This is the admin page. It is only available to users with the ADMIN role.
     </p>
-    <Switch>
-      <Route exact path={ROUTES.ADMIN_DETAILS} component={UserItem} />
-      <Route exact path={ROUTES.ADMIN} component={UserList} />
-    </Switch>
+    {/* <Switch> */}
+    {/* <Route exact path={ROUTES.ADMIN_DETAILS} component={UserItem} />
+      <Route exact path={ROUTES.ADMIN} component={UserList} /> */}
+    {/* </Switch> */}
   </>
 );
 
