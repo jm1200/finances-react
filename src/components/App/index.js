@@ -1,11 +1,10 @@
-import React, { useReducer, useState, useEffect, useContext } from "react";
+import React, { useReducer } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "@material-ui/styles";
-
-import { useAuthentication } from "../../custom-hooks";
+import useAuthentication from "../../custom-hooks/useAuthentication";
 
 //Components
 import Navigation from "../Navigation";
@@ -13,9 +12,9 @@ import LandingPage from "../Landing";
 import SignUpPage from "../SignUp";
 import SignInPage from "../SignIn";
 import PasswordForget from "../PasswordForget";
-import HomePage from "../Home";
+import Home from "../Home";
 import AccountPage from "../Account";
-// import AdminPage from "../Admin";
+import AdminPage from "../Admin";
 import UsersPage from "../UsersPage";
 import UserDetails from "../UsersPage/UserDetails";
 
@@ -26,7 +25,6 @@ import { PrivateRoute } from "../PrivateRoute/PrivateRoute";
 
 //Reducers
 import { navStateReducer, initialNavState } from "../Navigation/NavReducer";
-import { FirebaseContext } from "../Firebase";
 
 const theme = createMuiTheme({
   typography: {
@@ -37,35 +35,7 @@ const theme = createMuiTheme({
 export const AppStateContext = React.createContext(null);
 
 const App = () => {
-  const firebase = useContext(FirebaseContext);
-  const [authUser, setAuthUser] = useState(null);
-  useEffect(() => {
-    firebase.onAuthUserListener(
-      newUser => {
-        setAuthUser(newUser);
-      },
-      () => {
-        setAuthUser(null);
-      }
-    );
-  }, []);
-  // useEffect(() => {
-  //   const listener = firebase.onAuthUserListener(
-  //     newUser => {
-  //       setAuthUser(newUser);
-  //     },
-  //     () => {
-  //       setAuthUser(null);
-  //     }
-  //   );
-
-  //   return () => {
-  //     listener();
-  //   };
-  // }, []);
-  const userState = authUser;
-  console.log(userState);
-  //const firebase = useContext(FirebaseContext);
+  const userState = useAuthentication();
 
   const [navState, dispatchNavAction] = useReducer(
     navStateReducer,
@@ -76,9 +46,8 @@ const App = () => {
   const dispatchActionFunctions = action => {
     [dispatchNavAction].forEach(fn => fn(action));
   };
-  const AppState = { navState };
+  const AppState = { navState, userState };
   const appContext = { dispatchActionFunctions, AppState };
-  console.log(appContext);
 
   return (
     <div>
@@ -87,7 +56,7 @@ const App = () => {
           <AppStateContext.Provider value={appContext}>
             <CssBaseline />
             <BrowserRouter>
-              <Navigation />
+              <Navigation authUser={userState} />
 
               <Route exact path={ROUTES.LANDING} component={LandingPage} />
 
@@ -109,7 +78,7 @@ const App = () => {
               />
 
               <PrivateRoute
-                component={HomePage}
+                component={Home}
                 path={ROUTES.HOME}
                 authUser={userState}
                 roles={"USER"}
@@ -120,12 +89,12 @@ const App = () => {
                 authUser={userState}
                 roles={"USER"}
               />
-              {/* <PrivateRoute
+              <PrivateRoute
                 component={AdminPage}
                 path={ROUTES.ADMIN}
                 authUser={userState}
                 roles={"ADMIN"}
-              /> */}
+              />
               <PrivateRoute
                 component={UsersPage}
                 path={ROUTES.USERS}
