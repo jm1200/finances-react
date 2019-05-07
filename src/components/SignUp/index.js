@@ -54,6 +54,7 @@ const SignUp = props => {
               firstName,
               lastName,
               email,
+              uid: authUser.user.uid,
               roles: ["USER"]
             },
             { merge: true }

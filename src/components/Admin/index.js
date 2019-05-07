@@ -68,19 +68,26 @@ const UserList = () => {
   );
 };
 
-const UserItem = ({ match }) => {
-  let [loading, setLoading] = useState(false);
-  let [user, setUser] = useState({});
+const UserItem = props => {
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
   const firebase = useContext(FirebaseContext);
 
   useEffect(() => {
+    if (props.location.state.user) {
+      setUser(props.location.state.user);
+      return;
+    }
+
     setLoading(true);
-    const listener = firebase.user(match.params.id).onSnapshot(snapshot => {
-      console.log(snapshot.data());
-      setUser(snapshot.data());
-    });
-    console.log(user);
-    setLoading(false);
+
+    const listener = firebase
+      .user(props.match.params.id)
+      .onSnapshot(snapshot => {
+        setUser(snapshot.data());
+
+        setLoading(false);
+      });
 
     return () => {
       listener();
@@ -90,7 +97,8 @@ const UserItem = ({ match }) => {
   return (
     <div>
       <Link to={ROUTES.ADMIN}>Return to user list</Link>
-      <h2>User ({match.params.id})</h2>
+      <h2>User ({props.match.params.id})</h2>
+
       {loading && <div>Loading ...</div>}
 
       {user && (
