@@ -16,10 +16,10 @@ export const homePageLink = createLinkComponent(ROUTES.HOME);
 
 //Admin Tools Menu Options////////////////////////////////////////////////////////////////////////////////////
 
-const usersPageMenuItem = {
-  link: createLinkComponent(ROUTES.USERS),
-  label: "Users"
-};
+// const usersPageMenuItem = {
+//   link: createLinkComponent(ROUTES.USERS),
+//   label: "Users"
+// };
 const adminMenuItem1 = {
   link: createLinkComponent("/Link2Component"),
   label: "Admin Link 2"
@@ -34,7 +34,7 @@ const admin = {
 };
 
 export const adminToolsMenuOptions = [
-  usersPageMenuItem,
+  // usersPageMenuItem,
   admin,
   adminMenuItem1,
   adminMenuItem2

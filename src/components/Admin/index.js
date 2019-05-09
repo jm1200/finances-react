@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import * as ROUTES from "../../constants/routes";
 import { FirebaseContext } from "../Firebase";
+import Button from "@material-ui/core/Button";
 
 const Admin = () => (
   <>
@@ -73,6 +74,10 @@ const UserItem = props => {
   const [user, setUser] = useState(null);
   const firebase = useContext(FirebaseContext);
 
+  const onSendPasswordResetEmail = () => {
+    firebase.doPasswordReset(this.state.user.email);
+  };
+
   useEffect(() => {
     if (props.location.state.user) {
       setUser(props.location.state.user);
@@ -111,6 +116,17 @@ const UserItem = props => {
           </span>
           <span>
             <strong>Name: </strong> {user.firstName + " " + user.lastName}
+          </span>
+
+          <span>
+            <Button
+              type="button"
+              variant="contained"
+              color="primary"
+              onClick={onSendPasswordResetEmail}
+            >
+              Send Password Reset
+            </Button>
           </span>
         </div>
       )}

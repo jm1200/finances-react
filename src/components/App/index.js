@@ -95,7 +95,7 @@ const App = () => {
                 authUser={userState}
                 roles={"ADMIN"}
               />
-              <PrivateRoute
+              {/* <PrivateRoute
                 component={UsersPage}
                 path={ROUTES.USERS}
                 authUser={userState}
@@ -106,7 +106,7 @@ const App = () => {
                 path={ROUTES.USER_DETAILS}
                 authUser={userState}
                 roles={"ADMIN"}
-              />
+              /> */}
             </BrowserRouter>
           </AppStateContext.Provider>
         </ThemeProvider>

@@ -18,6 +18,8 @@ class Firebase {
     // Firebase APIs
     this.auth = app.auth();
     this.db = app.firestore();
+    //console.log(app.firestore.Timestamp.fromDate(new Date()));
+    this.firestore = app.firestore;
   }
 
   onAuthUserListener = (next, fallback) => {
@@ -72,6 +74,12 @@ class Firebase {
   user = uid => this.db.doc(`users/${uid}`);
 
   users = () => this.db.collection("users");
+
+  // *** Message API ***
+
+  message = uid => this.db.doc(`messages/${uid}`);
+
+  messages = () => this.db.collection("messages");
 }
 
 export default Firebase;
