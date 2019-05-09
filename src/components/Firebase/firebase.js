@@ -3,12 +3,13 @@ import "firebase/auth";
 import "firebase/firestore";
 
 const config = {
-  apiKey: "AIzaSyAGJovUlsq1L05Ipt9xlY23F9mwyo3ldPc",
-  authDomain: "website-boilerplate.firebaseapp.com",
-  databaseURL: "https://website-boilerplate.firebaseio.com",
-  projectId: "website-boilerplate",
-  storageBucket: "website-boilerplate.appspot.com",
-  messagingSenderId: "853851661443"
+  apiKey: "AIzaSyD9v4dutqedNRE6e5UHA8Vb2y6gONAR0TI",
+  authDomain: "finances-dec3e.firebaseapp.com",
+  databaseURL: "https://finances-dec3e.firebaseio.com",
+  projectId: "finances-dec3e",
+  storageBucket: "finances-dec3e.appspot.com",
+  messagingSenderId: "355802560264",
+  appId: "1:355802560264:web:7619ba46f000a3f5"
 };
 
 class Firebase {

@@ -73,7 +73,7 @@ const Navigation = ({ authUser }) => {
               color="inherit"
             >
               <Typography variant="h6" color="inherit" className={classes.grow}>
-                Website-Boilerplate
+                Finances
               </Typography>
             </Button>
           </div>
