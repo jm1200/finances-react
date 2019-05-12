@@ -61,9 +61,14 @@ const account = {
   label: "Account"
 };
 
+const expenses = {
+  link: createLinkComponent("/expenses"),
+  label: "Expenses"
+};
+
 const authLink1 = {
   link: createLinkComponent("/auth1"),
   label: "Signed-In User Link 1"
 };
 
-export const authLinks = [authLink1, account];
+export const authLinks = [authLink1, expenses, account];

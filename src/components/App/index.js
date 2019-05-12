@@ -15,8 +15,7 @@ import PasswordForget from "../PasswordForget";
 import Home from "../Home";
 import AccountPage from "../Account";
 import AdminPage from "../Admin";
-import UsersPage from "../UsersPage";
-import UserDetails from "../UsersPage/UserDetails";
+import Expenses from "../Expenses";
 
 //Router Components
 import * as ROUTES from "../../constants/routes";
@@ -94,6 +93,12 @@ const App = () => {
                 path={ROUTES.ADMIN}
                 authUser={userState}
                 roles={"ADMIN"}
+              />
+              <PrivateRoute
+                component={Expenses}
+                path={ROUTES.EXPENSES}
+                authUser={userState}
+                roles={"USER"}
               />
               {/* <PrivateRoute
                 component={UsersPage}
