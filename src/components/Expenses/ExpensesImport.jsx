@@ -155,28 +155,3 @@ const ExpensesImport = props => {
 };
 
 export default ExpensesImport;
-
-// const TransactionsImport = ({ firebase, transRef, transactions }) => {
-//   if (transactions) {
-//     //Get all newly import transaction descriptions and check if they are already in the database list
-//     let newDescriptions = transactions.map(
-//       transaction => transaction.description
-//     );
-//     transRef.onSnapshot(snapshot => {
-//       const data = snapshot.data();
-//       console.log(data);
-//       if (data && !data.transactionTypeList) {
-//         transRef.set({ transactionTypeList: newDescriptions });
-//       } else {
-//         transRef.update({
-//           transactionTypeList: firebase.firestore.FieldValue.arrayUnion.apply(
-//             null,
-//             newDescriptions
-//           )
-//         });
-//       }
-//     });
-//   }
-
-//   return null;
-// };
