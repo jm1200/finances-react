@@ -35,6 +35,7 @@ export const AppStateContext = React.createContext(null);
 
 const App = () => {
   const userState = useAuthentication();
+  //console.log("App: ", userState);
 
   const [navState, dispatchNavAction] = useReducer(
     navStateReducer,

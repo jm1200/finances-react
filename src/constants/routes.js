@@ -10,6 +10,7 @@ export const PASSWORD_FORGET = "/pw-forget";
 export const EXPENSES = "/expenses";
 export const EXPENSES_LIST = "/expenses/list";
 export const EXPENSES_IMPORT = "/expenses/import";
+export const CATEGORIES_MANAGER = "/expenses/categories";
 
 //Admin Role
 export const ADMIN = "/admin";

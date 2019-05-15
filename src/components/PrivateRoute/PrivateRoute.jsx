@@ -29,7 +29,7 @@ export const PrivateRoute = ({
         }
 
         // authorised so return component
-        return <Component {...props} />;
+        return <Component authUser={authUser} {...props} />;
       }}
     />
   );

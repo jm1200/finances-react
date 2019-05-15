@@ -8,10 +8,9 @@ const uuid = require("uuid/v4");
 const ExpensesImport = props => {
   const authUser = props.location.state.authUser;
   const firebase = useContext(FirebaseContext);
-  const transRef = firebase.userTransactions(authUser);
+  const transRef = firebase.userTransactions(authUser.uid);
   const [input, setInput] = useState("");
   const [transactions, setTransactions] = useState(null);
-  const [added, setAdded] = useState(true);
 
   const onInputChange = e => {
     setInput(e.target.value);
@@ -19,13 +18,10 @@ const ExpensesImport = props => {
 
   const onHandleSubmit = e => {
     e.preventDefault();
-    setAdded(false);
-
-    const transactions = [];
+    const emptyArray = [];
     const newInput = input.split("\n");
     newInput.forEach(line => {
       let lineObj = {};
-      console.log("first ", lineObj);
 
       let splitLine = line.split(",");
 
@@ -37,55 +33,46 @@ const ExpensesImport = props => {
       lineObj["category"] = "";
       lineObj["sub-category"] = "";
       lineObj["catagorized"] = false;
-      console.log(lineObj);
-      transactions.push(lineObj);
+
+      emptyArray.push(lineObj);
     });
-    console.log(transactions);
-    setTransactions(transactions);
+
+    setTransactions(emptyArray);
     setInput("");
+  };
+
+  const importTransactionsHelper = transactions => {
+    let newDescriptions = transactions.map(
+      transaction => transaction.description
+    );
 
     transRef.onSnapshot(snapshot => {
       let data = snapshot.data();
       //no transactions in DB, make new collection. Else update
       if (!data) {
-        transRef.set({ transactions: transactions });
+        transRef.set({
+          transactions: transactions,
+          transactionTypeList: newDescriptions
+        });
       } else {
         transRef.update({
           transactions: firebase.firestore.FieldValue.arrayUnion.apply(
             null,
             transactions
+          ),
+          transactionTypeList: firebase.firestore.FieldValue.arrayUnion.apply(
+            null,
+            newDescriptions
           )
         });
       }
     });
   };
 
-  const transactionsImport = () => {
-    if (!added && transactions) {
-      setAdded(true);
-      //Get all newly import transaction descriptions and check if they are already in the database list
-      let newDescriptions = transactions.map(
-        transaction => transaction.description
-      );
-      transRef.onSnapshot(snapshot => {
-        const data = snapshot.data();
-        console.log(data);
-        if (data && !data.transactionTypeList) {
-          transRef.set({ transactionTypeList: newDescriptions });
-        } else {
-          transRef.update({
-            transactionTypeList: firebase.firestore.FieldValue.arrayUnion.apply(
-              null,
-              newDescriptions
-            )
-          });
-        }
-      });
-    }
-  };
-
   useEffect(() => {
-    transactionsImport();
+    if (transactions) {
+      importTransactionsHelper(transactions);
+    }
   }, [transactions]);
 
   return (
@@ -114,11 +101,7 @@ const ExpensesImport = props => {
         </Button>
       </form>
       <hr />
-      {/* <TransactionsImport
-        transactions={transactions}
-        firebase={firebase}
-        transRef={transRef}
-      /> */}
+
       {/* TODO: Don't need search functionality or the Known column button. just leaving it so I remember how to do it later. */}
       {transactions && (
         <MaterialTable
