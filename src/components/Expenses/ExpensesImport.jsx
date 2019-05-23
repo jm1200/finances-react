@@ -5,6 +5,12 @@ import { FirebaseContext } from "../Firebase";
 
 const uuid = require("uuid/v4");
 
+const defaultCategories = {
+  income: ["Myself", "My Partner", "Rental"],
+  rental: ["hydro", "rental mortgage", "cable"],
+  utilities: ["hydro", "cable"]
+};
+
 const ExpensesImport = props => {
   const authUser = props.location.state.authUser;
   const firebase = useContext(FirebaseContext);
@@ -19,20 +25,24 @@ const ExpensesImport = props => {
   const onHandleSubmit = e => {
     e.preventDefault();
     const emptyArray = [];
-    const newInput = input.split("\n");
+    const newInput = input.trim().split("\n");
     newInput.forEach(line => {
       let lineObj = {};
 
       let splitLine = line.split(",");
+      let date = splitLine[0];
+      let dateParsed = new Date(date);
+      console.log(dateParsed.toString());
 
       lineObj["id"] = uuid();
-      lineObj["date"] = splitLine[0];
+      lineObj["date"] = new Date(splitLine[0]);
       lineObj["description"] = splitLine[1];
       lineObj["deposit"] = splitLine[3];
       lineObj["withdrawl"] = splitLine[2];
       lineObj["category"] = "";
-      lineObj["sub-category"] = "";
+      lineObj["subCategory"] = "";
       lineObj["catagorized"] = false;
+      lineObj["matchCategory"] = false;
 
       emptyArray.push(lineObj);
     });
@@ -42,29 +52,25 @@ const ExpensesImport = props => {
   };
 
   const importTransactionsHelper = transactions => {
-    let newDescriptions = transactions.map(
-      transaction => transaction.description
-    );
-
+    let transObj = {};
+    transactions.forEach(trans => {
+      transObj[trans.id] = trans;
+    });
     transRef.onSnapshot(snapshot => {
       let data = snapshot.data();
       //no transactions in DB, make new collection. Else update
       if (!data) {
         transRef.set({
-          transactions: transactions,
-          transactionTypeList: newDescriptions
+          transactions: transObj,
+          categories: defaultCategories
         });
       } else {
-        transRef.update({
-          transactions: firebase.firestore.FieldValue.arrayUnion.apply(
-            null,
-            transactions
-          ),
-          transactionTypeList: firebase.firestore.FieldValue.arrayUnion.apply(
-            null,
-            newDescriptions
-          )
-        });
+        transRef.set(
+          {
+            transactions: transObj
+          },
+          { merge: true }
+        );
       }
     });
   };
@@ -110,7 +116,9 @@ const ExpensesImport = props => {
             {
               title: "Date",
               field: "date",
-              render: rowData => <p>{rowData.date}</p>
+              render: rowData => {
+                return <p>{rowData.date.toDateString()}</p>;
+              }
             },
             { title: "Description", field: "description" },
             { title: "Depost", field: "deposit", type: "numeric" },

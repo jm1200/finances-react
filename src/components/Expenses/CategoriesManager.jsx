@@ -1,4 +1,4 @@
-import React, {useState, useReducer} from 'react';
+import React, {useState, useContext, useReducer, useEffect} from 'react';
 import { makeStyles } from '@material-ui/styles';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import List from '@material-ui/core/List';
@@ -15,10 +15,12 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import DoneIcon from "@material-ui/icons/Done";
 import CloseIcon from "@material-ui/icons/Close";
 import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
-import {Tooltip, Typography, TextField} from '@material-ui/core';
+import {Tooltip, Typography, TextField, Button} from '@material-ui/core';
+import {FirebaseContext} from '../Firebase';
+import {AppStateContext} from '../App';
 
-const cats = {
-    income: ["John", "Meghan", "Rental"],
+const defaultCategories = {
+    income: ["Myself", "My Partner", "Rental"],
     rental: ["hydro", "rental mortgage", "cable"],
     utilities: ["hydro", "cable"]
   };
@@ -64,32 +66,46 @@ const useStyles = makeStyles(theme => ({
   },
   icons: {
       color: "darkGrey"
+  },
+  saveModeContainer: {
+      display: "flex",
+      width: "95%",
+      justifyContent: "flex-end"
   }
 }));
 
-function NestedList() {
+function CategoriesManager() {
   const classes = useStyles();
+  const firebase = useContext(FirebaseContext);
+  const authUser = useContext(AppStateContext).AppState.userState;
   const [openMenus, setOpenMenus] = useState({});
+  const [categories, setCategories] = useState({});
   const initialState = {
-      categories: cats,
+      categories: {},
       editMode: false,
       deleteMode: false,
       addMode: false,
       addSubMode: false,
       editCategoryInput: "",
+      saveMode: false
   }
   const optionsReducer = (state, action)=>{
       let category;
       let subCategory;
+      let categories = {};
       if(action.payload){
         category = action.payload.category;
         subCategory = action.payload.subCategory;
+        categories = action.payload.categories;
       }
       
     switch (action.type) {
+        case "setCategories": {
+            return Object.assign({},{...state}, {categories: action.payload.categories, saveMode: false})
+        }
         case "close": { 
             return Object.assign({}, {...state}, 
-                {deleteMode:false, editMode:false, addMode: false, addSubMode: false});
+                {deleteMode:false, editMode:false, addMode: false, addSubMode: false, saveMode: false});
         }
         case "add": {
             return Object.assign({}, {...state}, {addMode:true});
@@ -101,10 +117,10 @@ function NestedList() {
             let nCats = {...state.categories}
             if(!category){
                 nCats[state.editCategoryInput] = [];
-                return Object.assign({}, {...state}, {categories: nCats, addMode: false, editCategoryInput: ""})
+                return Object.assign({}, {...state}, {categories: nCats, addMode: false, editCategoryInput: "", saveMode: true})
             } else {
                 nCats[category] = [...nCats[category], state.editCategoryInput]
-                return Object.assign({}, {...state}, {categories: nCats, addSubMode: false, editCategoryInput: ""})
+                return Object.assign({}, {...state}, {categories: nCats, addSubMode: false, editCategoryInput: "", saveMode:true})
             }
         }
         case "edit" : { 
@@ -122,24 +138,27 @@ function NestedList() {
                 let oldSubCats = nCats[category]
                 delete nCats[category];
                 nCats[state.editCategoryInput] = oldSubCats;
-                return Object.assign({}, {...state}, {categories: nCats, editMode: false, editCategoryInput: ""})
+                return Object.assign({}, {...state}, 
+                    {categories: nCats, 
+                     editMode: false, 
+                     editCategoryInput: "",
+                    saveMode: true
+                    })
             } else {
                 let filteredNCats = nCats[category].filter(sub=>sub!==subCategory);
                 filteredNCats = [...filteredNCats, state.editCategoryInput];
                 nCats[category] = filteredNCats;
-                return Object.assign({}, {...state},{categories: nCats, editMode: false, editCategoryInput: ""} )
-                
+                return Object.assign({}, {...state},{categories: nCats, editMode: false, editCategoryInput: "", saveMode: true} )
             }
         }
         case "deleteCategoryDone" : {
             let nCats = { ...state.categories }
             if(!subCategory){
                 delete nCats[category]
-                return Object.assign({},{...state}, {categories: nCats, deleteMode: false});
+                return Object.assign({},{...state}, {categories: nCats, deleteMode: false, saveMode: true});
             } else {
                 nCats[category] = nCats[category].filter(sub=>sub!==subCategory);
-                return Object.assign({}, {...state},{categories: nCats, deleteMode: false} );
-                
+                return Object.assign({}, {...state},{categories: nCats, deleteMode: false, saveMode: true} );
             }
         }
         case "inputChange" : {
@@ -175,10 +194,30 @@ const handleAddSub= (event, category)=>{
     event.stopPropagation();
     dispatch({type: action, payload:{category, subCategory}})
   }
+  const saveToFirestore = ()=>{
+    let docRef = firebase.db.collection("transactions").doc(authUser.uid)
+    docRef.update({categories: state.categories})
+    setCategories(state.categories);
+    dispatch({type: "setCategories", payload: {categories:state.categories}});
+  }
+
+  useEffect(()=>{
+      let docRef = firebase.db.collection("transactions").doc(authUser.uid)
+        docRef.get().then(doc=>{
+            if(doc.exists){
+                
+                dispatch({type: "setCategories", payload: {categories:doc.data().categories || defaultCategories}});
+            }
+        })
+        
+   
+     
+  },[])
 
   return (
+      <>
+      {console.log(state)}
     <List
-    
       component="nav"
       subheader={
         <div className={classes.listSubheaderContainer}>
@@ -282,7 +321,13 @@ const handleAddSub= (event, category)=>{
       })}
       
     </List>
+    {state.saveMode && <div className={classes.saveModeContainer}>
+        <Button onClick={saveToFirestore} color="primary" variant="contained">Save Changes</Button>
+        <Button onClick={(event)=>dispatch({type:"setCategories", payload:{categories:categories}})} color="primary" variant="contained">Reset Categories</Button>
+        </div>}
+    
+    </>
   );
 }
 
-export default NestedList;
+export default CategoriesManager;
