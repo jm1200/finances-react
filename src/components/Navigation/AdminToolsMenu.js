@@ -1,12 +1,8 @@
-import React, { useContext } from "react";
-import { AppStateContext } from "../App";
+import React from "react";
 import { Menu, MenuItem } from "@material-ui/core";
 import { adminToolsMenuOptions } from "./navlinks";
 
-const AdminToolsMenu = () => {
-  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
-  const navState = useContext(AppStateContext).AppState.navState;
-
+const AdminToolsMenu = ({ navState, dispatch }) => {
   const isAdminToolsMenuOpen = Boolean(navState.adminToolsAnchorEl);
 
   const handleMenuClose = () => {

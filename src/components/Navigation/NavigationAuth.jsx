@@ -1,14 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Button } from "@material-ui/core";
 import * as ROLES from "../../constants/roles";
 import SignOut from "../SignOut";
-import { AppStateContext } from "../App";
 import { authLinks } from "./navlinks";
 
-const NavigationAuth = ({ authUser }) => {
-  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
-  const navState = useContext(AppStateContext).AppState.navState;
-
+const NavigationAuth = ({ authUser, navState, dispatch }) => {
   const openAdminTools = event => {
     const payload = navState.adminToolsAnchorEl ? null : event.currentTarget;
     dispatch({ type: "ADMIN", payload });
@@ -30,7 +26,7 @@ const NavigationAuth = ({ authUser }) => {
           );
         })}
 
-      <SignOut />
+      <SignOut navState={navState} dispatch={dispatch} />
     </>
   );
 };

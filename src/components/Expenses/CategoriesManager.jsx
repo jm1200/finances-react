@@ -18,12 +18,11 @@ import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import {Tooltip, Typography, TextField, Button} from '@material-ui/core';
 import {FirebaseContext} from '../Firebase';
 import {AppStateContext} from '../App';
+import {defaultCategories} from '../../constants/defaultData';
 
-const defaultCategories = {
-    income: ["Myself", "My Partner", "Rental"],
-    rental: ["hydro", "rental mortgage", "cable"],
-    utilities: ["hydro", "cable"]
-  };
+const uuid = require('uuid/v4');
+
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -80,6 +79,7 @@ function CategoriesManager() {
   const authUser = useContext(AppStateContext).AppState.userState;
   const [openMenus, setOpenMenus] = useState({});
   const [categories, setCategories] = useState({});
+
   const initialState = {
       categories: {},
       editMode: false,
@@ -92,11 +92,11 @@ function CategoriesManager() {
   const optionsReducer = (state, action)=>{
       let category;
       let subCategory;
-      let categories = {};
+      //let categoriesPayload = {};
       if(action.payload){
         category = action.payload.category;
         subCategory = action.payload.subCategory;
-        categories = action.payload.categories;
+       // categoriesPayload = action.payload.categories;
       }
       
     switch (action.type) {
@@ -124,6 +124,7 @@ function CategoriesManager() {
             }
         }
         case "edit" : { 
+            
             return Object.assign({}, {...state}, 
                 {editCategoryInput:subCategory?subCategory:category, 
                  editMode:subCategory?category+subCategory:category});
@@ -133,6 +134,7 @@ function CategoriesManager() {
             return Object.assign({}, {...state}, {deleteMode: subCategory?category+subCategory:category});
         }
         case "editCategoryDone" : {
+            console.log(category, subCategory);
             let nCats = { ...state.categories }
             if(!subCategory){
                 let oldSubCats = nCats[category]
@@ -202,6 +204,26 @@ const handleAddSub= (event, category)=>{
   }
 
   useEffect(()=>{
+    
+    const defaultCategoriesFirestore = {};
+    Object.keys(defaultCategories).forEach(category=>{
+        let catId = uuid();
+        let subCategories = {}
+        defaultCategories[category].forEach(subCategory=>{
+            let subId = uuid();
+            subCategories[subId] = {
+                id: subId,
+                name: subCategory
+            }
+        })
+        defaultCategoriesFirestore[catId]={
+            id:catId,
+            name: category,
+            subCategories: {...subCategories}
+        }
+    })
+    console.log(defaultCategoriesFirestore);
+
       let docRef = firebase.db.collection("transactions").doc(authUser.uid)
         docRef.get().then(doc=>{
             if(doc.exists){
@@ -216,7 +238,6 @@ const handleAddSub= (event, category)=>{
 
   return (
       <>
-      {console.log(state)}
     <List
       component="nav"
       subheader={

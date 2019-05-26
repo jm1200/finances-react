@@ -1,6 +1,5 @@
-import React, { useContext } from "react";
+import React, { useReducer } from "react";
 import { homePageLink, landingPageLink } from "./navlinks";
-import { AppStateContext } from "../App";
 import { makeStyles } from "@material-ui/styles";
 import {
   Typography,
@@ -17,6 +16,8 @@ import NavigationNoAuth from "./NavigationNoAuth";
 import NavigationAuth from "./NavigationAuth";
 import AdminToolsMenu from "./AdminToolsMenu";
 import SideNav from "./SideNav";
+
+import { navStateReducer, initialNavState } from "./NavReducer";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -37,9 +38,10 @@ const useStyles = makeStyles(theme => {
 });
 
 const Navigation = ({ authUser }) => {
-  //const authUser = useContext(AppStateContext).AppState.userState;
-  const navState = useContext(AppStateContext).AppState.navState;
-  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
+  const [navState, dispatchNavAction] = useReducer(
+    navStateReducer,
+    initialNavState
+  );
   const classes = useStyles();
   //const tablet = useMediaQuery("(max-width: 950px)");
   const phone = useMediaQuery("(max-width: 600px)");
@@ -48,7 +50,7 @@ const Navigation = ({ authUser }) => {
   const titleLink = authUser ? homePageLink : landingPageLink;
 
   const toggleSideNav = () => {
-    dispatch({ type: "SIDENAVTOGGLE" });
+    dispatchNavAction({ type: "SIDENAVTOGGLE" });
   };
 
   return (
@@ -67,11 +69,7 @@ const Navigation = ({ authUser }) => {
           )}
 
           <div className={classes.grow}>
-            <Button
-              component={titleLink}
-              //onClick={this.handleMenuClose}
-              color="inherit"
-            >
+            <Button component={titleLink} color="inherit">
               <Typography variant="h6" color="inherit" className={classes.grow}>
                 Finances
               </Typography>
@@ -80,9 +78,16 @@ const Navigation = ({ authUser }) => {
           {desktop && (
             <>
               {authUser ? (
-                <NavigationAuth authUser={authUser} />
+                <NavigationAuth
+                  authUser={authUser}
+                  navState={navState}
+                  dispatch={dispatchNavAction}
+                />
               ) : (
-                <NavigationNoAuth />
+                <NavigationNoAuth
+                  navState={navState}
+                  dispatch={dispatchNavAction}
+                />
               )}
             </>
           )}
@@ -90,10 +95,14 @@ const Navigation = ({ authUser }) => {
       </AppBar>
       <Drawer open={navState.sideNav} onClose={toggleSideNav}>
         <div tabIndex={0} role="button">
-          <SideNav />
+          <SideNav
+            authUser={authUser}
+            navState={navState}
+            dispatch={dispatchNavAction}
+          />
         </div>
       </Drawer>
-      <AdminToolsMenu />
+      <AdminToolsMenu navState={navState} dispatch={dispatchNavAction} />
     </div>
   );
 };

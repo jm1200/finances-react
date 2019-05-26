@@ -1,19 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
 import { List, ListItem, Divider } from "@material-ui/core";
-import { AppStateContext } from "../App";
 import { authLinks, noAuthLinks, adminToolsMenuOptions } from "./navlinks";
 import SignOut from "../SignOut";
-// import {
-//   link1,
-//   signInLink,
-//   accountPageLink,
-//   usersPageLink
-// } from "../../constants/navlinks";
 
-const SideNav = () => {
-  const dispatch = useContext(AppStateContext).dispatchActionFunctions;
-  const authUser = useContext(AppStateContext).AppState.userState;
-
+const SideNav = ({ authUser, navState, dispatch }) => {
   const toggleSideNav = () => {
     dispatch({ type: "SIDENAVTOGGLE" });
   };
@@ -22,7 +12,11 @@ const SideNav = () => {
     <div className="list">
       <List>
         {authUser ? (
-          <SideNavAuth toggleSideNav={toggleSideNav} />
+          <SideNavAuth
+            navState={navState}
+            dispatch={dispatch}
+            toggleSideNav={toggleSideNav}
+          />
         ) : (
           <SideNavNoAuth toggleSideNav={toggleSideNav} />
         )}
@@ -50,15 +44,10 @@ const SideNavNoAuth = ({ toggleSideNav }) => {
           </ListItem>
         );
       })}
-      {/* <ListItem component={link1} onClick={toggleSideNav}>
-        No Authentication Link 1
-      </ListItem>
-
-      <ListItem component={signInLink}>Sign In</ListItem> */}
     </>
   );
 };
-const SideNavAuth = ({ toggleSideNav }) => {
+const SideNavAuth = ({ toggleSideNav, navState, dispatch }) => {
   return (
     <>
       {authLinks.map(obj => {
@@ -73,12 +62,7 @@ const SideNavAuth = ({ toggleSideNav }) => {
         );
       })}
       <Divider />
-      <SignOut Component={ListItem} />
-
-      {/* <ListItem component={link1} onClick={toggleSideNav}>
-        With Authentication Link 1
-      </ListItem>
-      <ListItem component={accountPageLink}>Account</ListItem> */}
+      <SignOut Component={ListItem} navState={navState} dispatch={dispatch} />
     </>
   );
 };
@@ -97,11 +81,6 @@ const SideNavAdmin = ({ toggleSideNav }) => {
           </ListItem>
         );
       })}
-
-      {/* <ListItem component={link1} onClick={toggleSideNav}>
-        No Authentication and Admin Role Link 1
-      </ListItem>
-      <ListItem component={usersPageLink}>Admin</ListItem> */}
     </>
   );
 };

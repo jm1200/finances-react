@@ -102,6 +102,7 @@ const ExpensesList = () => {
       { ...transactions },
       { [newData.id]: newData }
     );
+    console.log("updating");
     saveTransactions(newTransactions);
   };
 
@@ -123,7 +124,7 @@ const ExpensesList = () => {
   };
 
   const saveTransactions = data => {
-    docRef.set({ transactions: data }, { merge: true });
+    docRef.set({ transactions: deleteTableData(data) }, { merge: true });
   };
 
   const matchCategories = (event, rowData) => {

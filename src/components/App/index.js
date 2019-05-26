@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -22,9 +22,6 @@ import * as ROUTES from "../../constants/routes";
 import { PublicRoute } from "../PublicRoute/PublicRoute";
 import { PrivateRoute } from "../PrivateRoute/PrivateRoute";
 
-//Reducers
-import { navStateReducer, initialNavState } from "../Navigation/NavReducer";
-
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true
@@ -35,19 +32,9 @@ export const AppStateContext = React.createContext(null);
 
 const App = () => {
   const userState = useAuthentication();
-  //console.log("App: ", userState);
 
-  const [navState, dispatchNavAction] = useReducer(
-    navStateReducer,
-    initialNavState
-  );
-
-  //Global dispatch function
-  const dispatchActionFunctions = action => {
-    [dispatchNavAction].forEach(fn => fn(action));
-  };
-  const AppState = { navState, userState };
-  const appContext = { dispatchActionFunctions, AppState };
+  const AppState = { userState };
+  const appContext = { AppState };
 
   return (
     <div>

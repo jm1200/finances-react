@@ -1,0 +1,49 @@
+{
+    transactions: {
+        [userId]: {
+            [transactionId]: {
+                account: string,
+                card: string,
+                categorized: boolean,
+                date: Date object,
+                descriptions: string,
+                id: string,
+                matchCategory: boolean,
+                category: string, //categoryId
+                subCategory: string, //subCategoryId
+                deposit: number,
+                withdrawl: number
+            }
+        }
+    }
+    categories: {
+        [userId]: {
+            [categoryId]:{
+                name: string,
+                id: string,
+                subCatgories: {
+                    [subCategoryId]: {
+                        name: string,
+                        id:string
+                    }
+                }
+            }
+        }
+    }
+    users: {
+        [userId]:{
+            email: string,
+            firstName: string,
+            lastName: string,
+            roles: [string],
+            uid: string
+        }
+    }
+    messages: {
+        [messageId]:{
+            createdAt: ??,
+            text: string,
+            userId: string
+        }
+    }
+}

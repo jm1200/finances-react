@@ -25,6 +25,8 @@ class CustomMaterialTable extends React.Component {
             }
           }
         },
+        { title: "Account", field: "account" },
+        { title: "Card", field: "card" },
         { title: "Description", field: "description" },
         {
           title: "Withdrawl",
@@ -48,6 +50,7 @@ class CustomMaterialTable extends React.Component {
                   this.setState({ selectedCategory: e.target.value });
                   return props.onChange(e.target.value);
                 }}
+                subCategory={props.rowData.subCategory}
               />
             );
           }
@@ -110,16 +113,10 @@ class CustomMaterialTable extends React.Component {
               onClick: (event, rowData) =>
                 this.props.matchCategories(event, rowData)
             }
-
-            /* rowData => ({
-              icon: "remove_circle",
-              tooltip: "Un-match all descriptions",
-              onClick: (event, rowData) =>
-                this.props.unMatchCategories(event, rowData)
-            }) */
           ]}
           options={{
-            actionsColumnIndex: -1
+            actionsColumnIndex: -1,
+            filtering: true
           }}
           editable={{
             onRowAdd: newData =>
@@ -156,15 +153,13 @@ class CustomMaterialTable extends React.Component {
               }),
             onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
-                this.props.updateTransaction(newData);
                 setTimeout(() => {
                   {
                     const data = this.state.data;
                     const index = data.indexOf(oldData);
                     newData.date = new Date(newData.date);
                     data[index] = newData;
-                    console.log(data);
-
+                    this.props.updateTransaction(newData);
                     this.setState({ data, selectedCategory: "" }, () =>
                       resolve()
                     );
@@ -196,7 +191,7 @@ class CustomMaterialTable extends React.Component {
 
 export default CustomMaterialTable;
 
-const CustomSelect = ({ value, onChange, categories }) => {
+const CustomSelect = ({ value, onChange, categories, subCategory }) => {
   const useStyles = makeStyles(theme => ({
     root: {
       display: "flex",
@@ -210,7 +205,12 @@ const CustomSelect = ({ value, onChange, categories }) => {
       marginTop: theme.spacing.unit * 2
     }
   }));
-
+  let disabled;
+  if (subCategory) {
+    disabled = true;
+  } else {
+    disabled = false;
+  }
   const classes = useStyles();
   return (
     <div className={classes.root}>
@@ -220,7 +220,7 @@ const CustomSelect = ({ value, onChange, categories }) => {
           onChange={onChange}
           className={classes.selectEmpty}
         >
-          <option value="None">None</option>
+          <option value="">None</option>
           {categories.map(cat => (
             <option key={cat} value={cat}>
               {cat}
@@ -231,29 +231,3 @@ const CustomSelect = ({ value, onChange, categories }) => {
     </div>
   );
 };
-
-// const updateTransactions = (
-//   description,
-//   category,
-//   subCategory,
-//   transactions
-// ) => {
-//   const newTransactions = {};
-//   Object.keys(transactions).forEach(transKey => {
-//     if (transactions[transKey].description === description) {
-//       newTransactions[transKey] = Object.assign(
-//         {},
-//         { ...transactions[transKey] },
-//         {
-//           category: category,
-//           subCategory: subCategory || "",
-//           categorized: true
-//         }
-//       );
-//     } else {
-//       newTransactions[transKey] = transactions[transKey];
-//     }
-//   });
-
-//   return newTransactions;
-// };

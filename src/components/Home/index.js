@@ -4,6 +4,7 @@ import { FirebaseContext } from "../Firebase";
 import { useInput, useSubmit } from "../../custom-hooks";
 import { validations } from "../../constants/validation-regex";
 import { Button, TextField } from "@material-ui/core";
+import { StoreContext } from "../App";
 
 const Home = () => {
   const authUser = useContext(AppStateContext).AppState.userState;
