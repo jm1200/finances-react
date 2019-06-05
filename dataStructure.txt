@@ -16,6 +16,9 @@
             }
         }
     }
+
+    
+
     categories: {
         [userId]: {
             [categoryId]:{
@@ -29,6 +32,18 @@
                 }
             }
         }
+    }
+    
+
+    categories: {
+        [userId] :[
+            id: string,
+            name: string,
+            subCategories: [
+                id: string,
+                name:string
+            ]
+        ]
     }
     users: {
         [userId]:{
@@ -47,3 +62,56 @@
         }
     }
 }
+
+
+
+
+
+categories: {
+    [categoryId]:{
+        name: string,
+        id: string,
+        subCatgories: {
+            [subCategoryId]: {
+                name: string,
+                id:string
+            }
+        }
+    }
+}
+
+params: categoryId, subCategoryId
+
+create new category: newCategories = Object.assign({},{...categories}, {newCategory})
+read one category: oneCategory = categories[categoryId]
+update one category: newCategories = Object.assign({}, {...categories}, {updatedCategory})
+delete one category: {category.id, ...newCategories} = categories
+iterate: Object.keys(categories).forEach(category=>categories[category])
+create new subCategory:
+read one subCategory:
+update one subCategory:
+delete one subCategory:
+iterate subCategories:
+
+
+
+OR?
+
+categories:[
+    id: string,
+    name: string,
+    subCategories: [
+        id: string,
+        name:string
+    ]
+]
+create: newCategories = [...categories, newCategory]
+read one category: oneCategory = categories.filter(category=>category.id===id)
+update: newCategories = categories.filter(category=>category.id !== oldId).concat(updatedCategory);
+delete: newCategories = categories.filter(category=>category.id !== oldId)
+iterate: categories.forEach(category=>category)
+create new subCategory:
+read one subCategory:
+update one subCategory:
+delete one subCategory:
+iterate subCategories:

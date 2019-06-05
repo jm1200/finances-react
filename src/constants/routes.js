@@ -11,9 +11,11 @@ export const EXPENSES = "/expenses";
 export const EXPENSES_LIST = "/expenses/list";
 export const EXPENSES_IMPORT = "/expenses/import";
 export const CATEGORIES_MANAGER = "/expenses/categories";
+export const REPORTS = "/expenses/reports";
 
 //Admin Role
 export const ADMIN = "/admin";
 export const ADMIN_DETAILS = "/admin/:id";
+export const SANDBOX = "/sandbox";
 // export const USERS = "/users";
 // export const USER_DETAILS = "/users/:id";

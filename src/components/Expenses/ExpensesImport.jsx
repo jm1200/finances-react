@@ -19,17 +19,18 @@ const useStyles = makeStyles(theme => {
 
 const uuid = require("uuid/v4");
 
-const defaultCategories = {
-  income: ["Myself", "My Partner", "Rental"],
-  rental: ["hydro", "rental mortgage", "cable"],
-  utilities: ["hydro", "cable"]
-};
+// const defaultCategories = {
+//   income: ["Myself", "My Partner", "Rental"],
+//   rental: ["hydro", "rental mortgage", "cable"],
+//   utilities: ["hydro", "cable"]
+// };
 
 const ExpensesImport = props => {
   const authUser = props.location.state.authUser;
   const firebase = useContext(FirebaseContext);
-  const transRef = firebase.userTransactions(authUser.uid);
+  const transRef = firebase.db.collection("userTransactions").doc(authUser.uid);
   const [input, setInput] = useState("");
+  const [matchedCategories, setMatchedCategories] = useState({});
   const [selectedAccount, setSelectedAccount] = useState("");
   const [transactions, setTransactions] = useState(null);
   const classes = useStyles();
@@ -52,10 +53,7 @@ const ExpensesImport = props => {
       .slice(1);
     newInput.forEach(line => {
       let lineObj = {};
-      lineObj["category"] = "";
-      lineObj["subCategory"] = "";
-      lineObj["catagorized"] = false;
-      lineObj["matchCategory"] = false;
+
       lineObj["account"] = selectedAccount;
       lineObj["id"] = uuid();
 
@@ -77,20 +75,23 @@ const ExpensesImport = props => {
         const newSplitLine = commaCheck(splitLine, 4);
         lineObj["date"] = new Date(newSplitLine[0]);
         lineObj["description"] = newSplitLine[1];
-        lineObj["withdrawl"] = newSplitLine[2];
-        lineObj["deposit"] = newSplitLine[3];
+        lineObj["value"] = newSplitLine[2]
+          ? Number(newSplitLine[2]) * -1
+          : Number(newSplitLine[3]);
+        // lineObj["withdrawl"] = newSplitLine[2] ? Number(newSplitLine[2]) : "";
+        // lineObj["deposit"] = newSplitLine[3] ? Number(newSplitLine[3]) : "";
         lineObj["card"] = "Joint";
       } else if (selectedAccount === "Joint Mastercard") {
         const newSplitLine = commaCheck(splitLine, 5);
         lineObj["date"] = new Date(newSplitLine[2]);
         lineObj["description"] = newSplitLine[0];
-
-        let amount = newSplitLine[4];
-        if (amount < 0) {
-          lineObj["deposit"] = amount * -1;
-        } else {
-          lineObj["withdrawl"] = amount;
-        }
+        lineObj["value"] = Number(newSplitLine[4] * -1);
+        // let amount = Number(newSplitLine[4]);
+        // if (amount < 0) {
+        //   lineObj["deposit"] = amount * -1;
+        // } else {
+        //   lineObj["withdrawl"] = amount;
+        // }
         let card = newSplitLine[1];
         if (card === "**** 6412") {
           lineObj["card"] = "John";
@@ -101,11 +102,25 @@ const ExpensesImport = props => {
         }
       }
 
+      if (Object.keys(matchedCategories).includes(lineObj.description)) {
+        lineObj["category"] = matchedCategories[lineObj.description].categoryId;
+        lineObj["catagorized"] = true;
+      } else {
+        lineObj["category"] = "";
+        lineObj["catagorized"] = false;
+      }
+
+      if (Object.keys(matchedCategories).includes(lineObj.description)) {
+        lineObj["subCategory"] =
+          matchedCategories[lineObj.description].subCategoryId;
+      } else {
+        lineObj["subCategory"] = "";
+      }
       emptyArray.push(lineObj);
     });
-    //console.log(emptyArray);
 
     setTransactions(emptyArray);
+    importTransactionsHelper(emptyArray);
     setInput("");
   };
 
@@ -114,30 +129,30 @@ const ExpensesImport = props => {
     transactions.forEach(trans => {
       transObj[trans.id] = trans;
     });
-    transRef.onSnapshot(snapshot => {
-      let data = snapshot.data();
-      //no transactions in DB, make new collection. Else update
-      if (!data) {
-        transRef.set({
-          transactions: transObj,
-          categories: defaultCategories
-        });
-      } else {
-        transRef.set(
-          {
-            transactions: transObj
-          },
-          { merge: true }
-        );
-      }
+
+    let batch = firebase.db.batch();
+    transactions.forEach(transaction => {
+      let ref = transRef.collection("transactions").doc(transaction.id);
+      batch.set(ref, transaction);
     });
+
+    batch.commit();
   };
 
   useEffect(() => {
-    if (transactions) {
-      importTransactionsHelper(transactions);
-    }
-  }, [transactions]);
+    let firestoreMatchedCategories = {};
+    transRef
+      .collection("matchedCategories")
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          let { description } = doc.data();
+          firestoreMatchedCategories[description] = doc.data();
+        });
+        //console.log(firestoreMatchedCategories);
+        setMatchedCategories(firestoreMatchedCategories);
+      });
+  }, []);
 
   return (
     <>

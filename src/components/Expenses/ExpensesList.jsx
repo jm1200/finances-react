@@ -5,151 +5,149 @@ import { AppStateContext } from "../App";
 // import { makeStyles } from "@material-ui/styles";
 import CustomMaterialTable from "./CustomMaterialTable";
 
-const uuid = require("uuid/v4");
-
-// const testData = {
-//   "0078d3de-6688-45f8-b2b3-43b50183128a": {
-//     categorized: false,
-//     category: "",
-//     subCategory: "",
-//     date: "06/15/2018",
-//     description: "PAYROLL DEPOSIT AIR CANADA",
-//     withdrawl: "",
-//     deposit: "863.88",
-//     id: "0078d3de-6688-45f8-b2b3-43b50183128a"
-//   },
-//   "1078d3de-6688-45f8-b2b3-43b50183128a": {
-//     categorized: false,
-//     category: "",
-//     subCategory: "",
-//     date: "06/15/2017",
-//     description: "PAYROLL DEPOSIT AIR CANADA",
-//     withdrawl: "",
-//     deposit: "200.88",
-//     id: "1078d3de-6688-45f8-b2b3-43b50183128a"
-//   },
-//   "1375b4fc-297b-4898-bc4f-7bbea0e203d5": {
-//     categorized: false,
-//     category: "",
-//     subCategory: "",
-//     date: "06/18/2018",
-//     description: "EFT CREDIT CLAIMSECURE INC",
-//     withdrawl: "",
-//     deposit: "182.00",
-//     id: "1375b4fc-297b-4898-bc4f-7bbea0e203d5"
-//   },
-//   "240492e8-3619-4d9c-94a7-0432a2efd355": {
-//     categorized: false,
-//     category: "",
-//     subCategory: "",
-//     date: "06/13/2018",
-//     description: "INTERAC E-TRANSFER SEND Jennifer Cross",
-//     withdrawl: "85.00",
-//     deposit: "",
-//     id: "240492e8-3619-4d9c-94a7-0432a2efd355"
-//   },
-//   "694b1664-0356-4f2b-8f97-57215fca6fbe": {
-//     categorized: false,
-//     category: "",
-//     subCategory: "",
-//     date: "06/14/2018",
-//     description: "ABM DEPOSIT",
-//     withdrawl: "",
-//     deposit: "1640.00",
-//     id: "694b1664-0356-4f2b-8f97-57215fca6fbe"
-//   }
-// };
-
-// const testCategories = {
-//   income: ["John", "Meghan", "Rental"],
-//   rental: ["hydro", "rental mortgage", "cable"],
-//   utilities: ["hydro", "cable"]
-// };
-
 const ExpensesList = () => {
   const firebase = useContext(FirebaseContext);
   const authUser = useContext(AppStateContext).AppState.userState;
   const [categories, setCategories] = useState(null);
   const [transactions, setTransactions] = useState({});
   const [loading, setLoading] = useState(false);
-  const docRef = firebase.db.collection("transactions").doc(authUser.uid);
+  const transactionsRef = firebase.db
+    .collection("userTransactions")
+    .doc(authUser.uid);
+  const categoriesRef = firebase.db.collection("categories").doc(authUser.uid);
 
   useEffect(() => {
     setLoading(true);
-
     //GET TRANSACTIONS, CATEGORIES
 
-    docRef.get().then(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-
-        const fixDate = {};
-        Object.keys(data.transactions).forEach(transKey => {
-          let newObj = { ...data.transactions[transKey] };
-          newObj.date = newObj.date.toDate();
-          fixDate[transKey] = newObj;
-        });
-        setCategories(data.categories);
-        setTransactions(fixDate);
+    categoriesRef.get().then(catDoc => {
+      if (catDoc.exists) {
+        const catData = catDoc.data();
+        setCategories(catData);
       }
-      setLoading(false);
     });
+
+    let unsubscribe = transactionsRef
+      .collection("transactions")
+      .onSnapshot(querySnapshot => {
+        let firestoreTransactions = {};
+        querySnapshot.forEach(doc => {
+          //console.log("FS1", doc.data());
+          let date = doc.data().date.toDate();
+          let data = Object.assign({ ...doc.data() });
+          data.date = date;
+          firestoreTransactions[data.id] = data;
+        });
+        //console.log("FS2, transactions changed: ", firestoreTransactions);
+        setTransactions({ ...firestoreTransactions });
+
+        setLoading(false);
+      });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const updateTransaction = newData => {
-    let newTransactions = Object.assign(
-      {},
-      { ...transactions },
-      { [newData.id]: newData }
-    );
-    console.log("updating");
-    saveTransactions(newTransactions);
-  };
+  const saveTransactions = ({ type, payload }) => {
+    switch (type) {
+      case "add": {
+        payload.category = payload.category.id;
+        payload.subCategory = payload.subCategory.id;
+        //console.log("Added row:", payload);
 
-  const deleteTransaction = newData => {
-    docRef.update({
-      ["transactions." + newData.id]: firebase.firestore.FieldValue.delete()
-    });
-  };
+        transactionsRef
+          .collection("transactions")
+          .doc(payload.id)
+          .set(payload);
 
-  const addTransaction = newData => {
-    let id = uuid();
-    let newTransaction = Object.assign({}, { ...newData }, { id: id });
-    let newTransactions = Object.assign(
-      {},
-      { ...transactions },
-      { [id]: newTransaction }
-    );
-    saveTransactions(newTransactions);
-  };
+        break;
+      }
+      case "update": {
+        //console.log("updating row:", JSON.parse(JSON.stringify(payload)));
+        if (payload.category) {
+          payload.category = payload.category.id;
+        }
+        if (payload.subCategory) {
+          payload.subCategory = payload.subCategory.id;
+        }
+        //console.log("PAYLOAD ", payload);
+        transactionsRef
+          .collection("transactions")
+          .doc(payload.id)
+          .set(payload);
+        break;
+      }
+      case "delete": {
+        transactionsRef
+          .collection("transactions")
+          .doc(payload.id)
+          .delete();
+        break;
+      }
+      case "match": {
+        let {
+          newTransactions,
+          categoryId,
+          subCategoryId,
+          description
+        } = payload;
+        if (!categoryId) {
+          categoryId = "";
+        }
+        if (!subCategoryId) {
+          subCategoryId = "";
+        }
+        //first update all previous transactions
+        let batch = firebase.db.batch();
+        newTransactions.forEach(transKey => {
+          let objRef = transactionsRef.collection("transactions").doc(transKey);
+          batch.update(objRef, {
+            category: categoryId,
+            subCategory: subCategoryId
+          });
+        });
+        batch.commit();
 
-  const saveTransactions = data => {
-    docRef.set({ transactions: deleteTableData(data) }, { merge: true });
+        //second, update matchedCatgories for future transactions
+        transactionsRef
+          .collection("matchedCategories")
+          .doc(description)
+          .set(
+            {
+              description,
+              categoryId,
+              subCategoryId
+            },
+            { merge: true }
+          );
+        break;
+      }
+      default: {
+        console.log("There was an error: ", type, payload);
+      }
+    }
   };
 
   const matchCategories = (event, rowData) => {
     let { description, category, subCategory } = rowData;
-    let newTransactions = {};
 
-    Object.keys(transactions).forEach(transKey => {
-      if (transactions[transKey].description === description) {
-        let newObj = Object.assign(
-          {},
-          { ...transactions[transKey] },
-          { category, subCategory }
-        );
-        newTransactions[transKey] = newObj;
-      } else {
-        newTransactions[transKey] = transactions[transKey];
+    let newTransactions = Object.keys(transactions).reduce((acc, next) => {
+      if (transactions[next].description === description) {
+        acc.push(transactions[next].id);
+      }
+      return acc;
+    }, []);
+    // setTransactions(newTransactions);
+    saveTransactions({
+      type: "match",
+      payload: {
+        newTransactions,
+        categoryId: category.id,
+        subCategoryId: subCategory.id,
+        description
       }
     });
-    const nt = deleteTableData(newTransactions);
-    setTransactions(nt);
-    saveTransactions(nt);
-  };
-
-  const unMatchCategories = (event, rowData) => {
-    console.log("write code to un-match all categories", event, rowData);
   };
 
   return (
@@ -157,14 +155,11 @@ const ExpensesList = () => {
       <h3>Expenses List</h3>
       {loading ? (
         <p>Loading...</p>
-      ) : Object.keys(transactions).length > 0 ? (
-        <div style={{ maxWidth: "100%" }}>
+      ) : Object.keys(transactions).length > 0 && categories ? (
+        <div style={{ maxWidth: "90%", margin: "auto" }}>
           <CustomMaterialTable
-            updateTransaction={updateTransaction}
-            addTransaction={addTransaction}
-            deleteTransaction={deleteTransaction}
+            saveTransactions={saveTransactions}
             matchCategories={matchCategories}
-            unMatchCategories={unMatchCategories}
             transactions={transactions}
             categories={categories}
           />
@@ -180,17 +175,3 @@ const ExpensesList = () => {
 };
 
 export default ExpensesList;
-
-function deleteTableData(transObj) {
-  let newObj = {};
-  Object.keys(transObj).forEach(transKey => {
-    let obj = { ...transObj[transKey] };
-    if (transObj[transKey].tableData) {
-      delete obj.tableData;
-      newObj[transKey] = obj;
-    } else {
-      newObj[transKey] = obj;
-    }
-  });
-  return newObj;
-}

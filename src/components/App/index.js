@@ -16,6 +16,7 @@ import Home from "../Home";
 import AccountPage from "../Account";
 import AdminPage from "../Admin";
 import Expenses from "../Expenses";
+import Sandbox from "../Sandbox";
 
 //Router Components
 import * as ROUTES from "../../constants/routes";
@@ -87,6 +88,12 @@ const App = () => {
                 path={ROUTES.EXPENSES}
                 authUser={userState}
                 roles={"USER"}
+              />
+              <PrivateRoute
+                component={Sandbox}
+                path={ROUTES.SANDBOX}
+                authUser={userState}
+                roles={"ADMIN"}
               />
               {/* <PrivateRoute
                 component={UsersPage}

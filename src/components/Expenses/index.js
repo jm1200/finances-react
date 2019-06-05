@@ -4,6 +4,8 @@ import * as ROUTES from "../../constants/routes";
 import ExpensesList from "./ExpensesList";
 import ExpensesImport from "./ExpensesImport";
 import CategoriesManager from "./CategoriesManager";
+import CustomMatTable from "./CustomMatTable";
+import ExpenseReports from "./ExpenseReports";
 
 const Expenses = props => {
   const authUser = props.authUser;
@@ -41,9 +43,20 @@ const Expenses = props => {
             Categories Manager
           </Link>
         </li>
+        <li>
+          <Link
+            to={{
+              pathname: ROUTES.REPORTS,
+              state: { authUser: authUser }
+            }}
+          >
+            Expense Reports
+          </Link>
+        </li>
       </ul>
 
       <Switch>
+        <Route exact path={ROUTES.REPORTS} component={ExpenseReports} />
         <Route exact path={ROUTES.EXPENSES_LIST} component={ExpensesList} />
         <Route exact path={ROUTES.EXPENSES_IMPORT} component={ExpensesImport} />
         <Route

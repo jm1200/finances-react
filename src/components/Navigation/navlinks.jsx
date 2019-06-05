@@ -24,9 +24,9 @@ const adminMenuItem1 = {
   link: createLinkComponent("/Link2Component"),
   label: "Admin Link 2"
 };
-const adminMenuItem2 = {
-  link: createLinkComponent("/Link3Component"),
-  label: "Admin Link 3"
+const sandbox = {
+  link: createLinkComponent("/sandbox"),
+  label: "SandBox"
 };
 const admin = {
   link: createLinkComponent("/admin"),
@@ -37,7 +37,7 @@ export const adminToolsMenuOptions = [
   // usersPageMenuItem,
   admin,
   adminMenuItem1,
-  adminMenuItem2
+  sandbox
 ];
 
 //Public (no Auth) navbar links////////////////////////////////////////////////////////////////////////////////////
